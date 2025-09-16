@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using POC.TickerQ.Common;
+using POC.TickerQ.Jobs.CronJobs;
 using POC.TickerQ.Jobs.Data;
 using POC.TickerQ.Jobs.Helper;
 using TickerQ.Dashboard.DependencyInjection;
@@ -16,6 +17,9 @@ public class Program
 
         builder.Services.AddDbContext<TickerQDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), x => x.MigrationsHistoryTable("__EFMigrationsHistory", "public")));
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         builder.Services.AddTickerQ(options =>
         {

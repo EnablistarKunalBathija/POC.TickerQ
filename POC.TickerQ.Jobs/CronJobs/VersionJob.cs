@@ -1,30 +1,33 @@
-﻿using POC.TickerQ.Jobs.Helper;
+﻿using POC.TickerQ.Common;
 using TickerQ.Utilities.Base;
 
 namespace POC.TickerQ.Jobs.CronJobs;
 
 public class VersionJob
 {
-    [TickerFunction("ActivateVersion")]
+    private readonly ApplicationDbContext _applicationDbContext;
+
+    public VersionJob(ApplicationDbContext applicationDbContext)
+    {
+        _applicationDbContext = applicationDbContext;
+    }
+
+    [TickerFunction("ActivateVersion 2.0")]
     public async Task ActivateVersion()
     {
         try
         {
-            Console.WriteLine("\n \n \n ActivateVersion Started.");
+            Console.WriteLine("\n\n ActivateVersion Started.");
 
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("http://localhost:5192/") // your WebAPI base URL
-            };
+            var existingVersion = _applicationDbContext.Versions.OrderByDescending(i => i.Id).FirstOrDefault();
 
-            var client = new VersionClient(httpClient);
-            var updatedVersion = await client.ActivateLatestVersionAsync();
-
-            Console.WriteLine($"Activated Version Name: {updatedVersion?.Name} \n \n \n \n");
+            existingVersion.IsActive = true;
+            _applicationDbContext.SaveChanges();
+            Console.WriteLine($"Activated Version Name: {existingVersion?.Name}\n\n");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"\n \n \n \n ActivateJob Error: {ex.Message} \n \n \n \n", ex);
+            Console.WriteLine($"\n\n ActivateJob Error: {ex.Message}\n\n");
             throw;
         }
     }
